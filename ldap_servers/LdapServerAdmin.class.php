@@ -349,7 +349,7 @@ public function drupalFormSubmit($op, $values) {
   }
 
   if ($op == 'delete') {
-    $this->delete();
+    $this->delete($this);
   } 
   else { // add or update
     try {
