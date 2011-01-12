@@ -200,7 +200,7 @@ $form['#prefix'] = t($form['#prefix']);
 
   $form['binding'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Server Binding Credentials'),
+    '#title' => t('Server Binding Credentials (or Service Account)'),
     '#description' => t('<p>Some LDAP configurations (specially common in <strong>Active Directory</strong> setups) restrict anonymous searches.</p><p>If your LDAP setup does not allow anonymous searches, or these are restricted in such a way that login names for users cannot be retrieved as a result of them, then you have to specify here a DN//password pair that will be used for these searches.</p><p>For security reasons, this pair should belong to an LDAP account with stripped down permissions.</p>'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
