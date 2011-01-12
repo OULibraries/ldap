@@ -1,0 +1,38 @@
+==================================================================================
+LDAP API Installation instructions:
+==================================================================================
+1) Download the whole package of files from
+   http://drupal.org/project/ldap_api.
+
+2) Upload the LDAP files to the modules directory. The packages includes files
+   needed by the LDAP API, and optional modules to provide LDAP-based
+	authentication and authorization.
+
+3) Go to admin/build/modules and enable the needed modules from the
+   Lightweight Directory Access Protocal group.
+
+
+==================================================================================
+Configuration
+==================================================================================
+1)  Start with general setttings at admin/config/people/ldap.
+
+2)	Configure one (or more) ldap servers via admin/config/people/ldap/servers.
+
+3)	If using ldap for authentication, configure ldap authentication by going to
+	admin/config/people/ldap/authentication.
+
+4)	If using ldap for authorization, configure one mapping for each "consumer" via
+	admin/config/people/ldap/authorization. In most cases, the "consumer" will be 
+	Drupal roles and only 1 mapping will be created.
+
+
+==================================================================================
+Older PHP versions
+==================================================================================
+These modules will NOT work If you are using PHP 4 or any other version less
+than 5.1.
+
+==================================================================================
+More documentation is available at http://drupal.org/project/ldap
+==================================================================================
