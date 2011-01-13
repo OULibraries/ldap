@@ -12,6 +12,15 @@
 function ldap_api_install() {
   variable_set('ldap_api_encryption','none');
   variable_set('ldap_api_require_ssl_for_credentails',0);
+  
+  $schema = _ldap_api_schema();
+  _drupal_schema_initialize($schema, 'ldap_api', FALSE);
+
+  foreach ($schema as $name => $table) {
+    db_create_table($name, $table);
+  }
+
+  
 }
 
 /**
@@ -43,7 +52,7 @@ function ldap_api_requirements($phase) {
 /**
  * Implementation of hook_schema().
  */
-function ldap_api_schema() {
+function _ldap_api_schema() {
   $schema['ldap_servers'] = array(
     'fields' => array(
       'sid' => array(
