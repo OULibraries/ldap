@@ -11,6 +11,10 @@ LDAP API Installation instructions:
 3) Go to admin/build/modules and enable the needed modules from the
    Lightweight Directory Access Protocal group.
 
+  DO NOT ENABLE LDAP API AT THE SAME TIME. LDAP API conflicts with LDAP Servers
+  which is a temporary API for getting LDAP Authentication and Authorization 
+  working. They have yet to be merged and will create problems."
+
 
 ==================================================================================
 Configuration

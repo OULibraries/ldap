@@ -1,7 +1,11 @@
 ; $Id$
 name = "LDAP API"
-description = "An LDAP API that can be used by other modules."
-package = "Directory Services"
+description = "An LDAP API that can be used by other modules. 
+DO NOT ENABLE LDAP API. LDAP API conflicts with LDAP Servers
+  which is a temporary API for getting LDAP Authentication and Authorization 
+  working. They have yet to be merged and will create problems.
+  It is only in HEAD for developers."
+package = "Lightweight Directory Access Protocol"
 core = 7.x
 
 files[] = ldap_api.admin.inc
