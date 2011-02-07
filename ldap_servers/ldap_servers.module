@@ -68,7 +68,7 @@ define('LDAP_NAMING_VIOLATION', 0x40);
 define('LDAP_OBJECT_CLASS_VIOLATION', 0x41);
 define('LDAP_NOT_ALLOWED_ON_NONLEAF', 0x42);
 define('LDAP_NOT_ALLOWED_ON_RDN', 0x43);
-define('LDAP_ALREADY_EXISTS', 0x44/*68*/);
+define('LDAP_ALREADY_EXISTS', 0x44);
 define('LDAP_NO_OBJECT_CLASS_MODS', 0x45);
 define('LDAP_RESULTS_TOO_LARGE', 0x46);
 //NexttwoforLDAPv3);
@@ -203,6 +203,11 @@ function ldap_servers_theme() {
       'render element' => 'element',
       'file' => 'ldap_servers.theme.inc'
     ),
+     'ldap_servers_https_required' => array(
+      'variables' => array('site_name' => NULL, 'site_mail' => FALSE, 'site_contact_link' => FALSE),
+      'render element' => 'element',
+      'file' => 'ldap_servers.theme.inc'
+    ),     
 
   );
 }
@@ -221,8 +226,8 @@ function ldap_servers_cache_clear() {
  * @return array of server conf object keyed on sid or single server conf object (if flatten == TRUE) 
  */
 function ldap_servers_get_servers($sid = NULL, $type, $flatten = FALSE, $reset = FALSE) {
-   require_once('ldap_servers.inc');
-   return _ldap_servers_get_servers($sid, $type, $flatten, $reset);
+  require_once('ldap_servers.inc');
+  return _ldap_servers_get_servers($sid, $type, $flatten, $reset);
 }
 
 function ldap_servers_fields() {
@@ -247,16 +252,24 @@ function ldap_servers_ldaps_option_array() {
   return $options;
 }
 
-
+/**
+ * disable a logon form if ldap preferences exclude http logon forms
+ * 
+ * @param drupal logon form array $form 
+ */
 function ldap_servers_disable_http_check(&$form) {
- if (variable_get('ldap_servers_require_ssl_for_credentails', 1) == 1 && $_SERVER['HTTPS'] != 'on') {
-   $form['#prefix'] = t('This form is disable because it must be submitted from https.
-                        Try changing the url in your browser to start with &quot;https&quot;
-                        ');
- }
- 
-}
 
+  if (variable_get('ldap_servers_require_ssl_for_credentails', 1) == 1 && @$_SERVER['HTTPS'] != 'on') {
+
+    $tokens = array(
+      'site_name' => variable_get('site_name', 'this site'),
+      'site_mail' =>  variable_get('site_mail', ''),
+      );
+
+    $form['#prefix'] = theme('ldap_servers_https_required', $tokens);
+    $form['#disabled'] = TRUE;
+  } 
+}
 
 function ldap_servers_ldap_extension_summary($op = 'data') {
   require_once('ldap_servers.status.inc');
@@ -286,14 +299,12 @@ function ldap_servers_no_enabled_servers_msg($action) {
 
   $servers = ldap_servers_get_servers(NULL, 'enabled');
   if (count($servers) == 0) {
-      $message = t('At least one ldap server must configured and <em>enabled</em> before
-        !action.  Please go to !link to configure an LDAP server', 
-        array(
-            '!link' => l('admin/config/people/ldap/servers', 'admin/config/people/ldap/servers'),
-            '!action' => $action)
-        );
-      drupal_set_message($message, 'warning');
-      return $message;
+
+    $message = 'At least one ldap server must configured and <em>enabled</em> before' .
+      $action . '. Please go to ' . l('admin/config/people/ldap/servers', 'admin/config/people/ldap/servers') . ' to configure an LDAP server'; 
+
+    drupal_set_message($message, 'warning');
+    return $message;
   }
 }
 
@@ -304,9 +315,9 @@ function ldap_servers_help($path, $arg) {
     are two such modules.  LDAP Servers is a placeholder module whose functionility will 
     be replaced by LDAP API within the same LDAP project.
     More detailed help is available on drupal.org at !helplink.',
-          array(
-            '!helplink' => l(LDAP_SERVERS_DRUPAL_HELP_URL, LDAP_SERVERS_DRUPAL_HELP_URL),
-          ));
+      array(
+        '!helplink' => l(LDAP_SERVERS_DRUPAL_HELP_URL, LDAP_SERVERS_DRUPAL_HELP_URL),
+      ));
   
   switch ($path) {
     case 'admin/config/people/ldap/servers':

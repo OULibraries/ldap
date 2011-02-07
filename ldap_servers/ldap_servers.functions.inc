@@ -1,12 +1,11 @@
 <?php
 // $Id$
 
-
 /**
- * @file 
+ * @file
  * collection of functions that don't belong in server object
- *
  */
+
 
 function _ldap_servers_testldap($ldap, $sid) {
 // given an ldap array with parameters, or class object, or $sid from ldap_servers,
@@ -33,7 +32,7 @@ function _ldap_servers_baddn($dn, $dn_name) {
 }
 
 function ldap_servers_get_ldap_defaults($type = NULL) {
- 
+
   $ldap['default']['name'] = t('Default LDAP');
   $ldap['default']['description'] = ""; 
   $ldap["default"]['server']['port'] = 389;

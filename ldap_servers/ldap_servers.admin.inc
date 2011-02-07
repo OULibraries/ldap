@@ -28,7 +28,7 @@ function ldap_servers_servers_list($sid = NULL, $actions = FALSE) {
     'ldap_servers' => $ldap_server = ldap_servers_get_servers($sid, 'all'),
     'action' => TRUE,
     'type' => 'table',
-   );
+    );
 
   $html = theme('ldap_servers_list', $variables);
 
@@ -60,7 +60,7 @@ function ldap_servers_admin_form($form, &$form_state, $op = NULL, $sid = NULL) {
  * Validate hook for the LDAP server form.
  */
 function ldap_servers_admin_form_validate($form, &$form_state) {
-  $op = strtolower($form_state['clicked_button']['#value']);
+  $op = drupal_strtolower($form_state['clicked_button']['#value']);
   require_once('LdapServerAdmin.class.php');
   $server = new LdapServerAdmin($form_state['values']['sid']);
   $errors = $server->drupalFormValidate($op, $form_state['values']);
@@ -74,7 +74,7 @@ function ldap_servers_admin_form_validate($form, &$form_state) {
  */
 function ldap_servers_admin_form_submit($form, &$form_state) {
 
-  $op = strtolower($form_state['clicked_button']['#value']);
+  $op = drupal_strtolower($form_state['clicked_button']['#value']);
   require_once('LdapServerAdmin.class.php');
   $server = new LdapServerAdmin($form_state['values']['sid']);
   $server->drupalFormSubmit($op, $form_state['values']);  // add form data to object and save or create
@@ -150,10 +150,9 @@ function ldap_servers_admin_delete_submit($form, &$form_state) {
     else {
       drupal_set_message(t('LDAP Server delete failed.'), 'warning');
     }
- 
   } 
   else {
-     drupal_set_message(t('LDAP Server delete cancelled.'), 'status');
+    drupal_set_message(t('LDAP Server delete cancelled.'), 'status');
   }
   ldap_servers_cache_clear();
   drupal_goto(LDAP_SERVERS_MENU_BASE_PATH . '/servers/list');
@@ -189,7 +188,7 @@ function ldap_servers_admin_enable_disable($form, &$form_state, $action = NULL, 
       '#type' => 'hidden',
       '#value' => $ldap_server->name,
     );
-     $form['action'] = array(
+    $form['action'] = array(
       '#type' => 'hidden',
       '#value' => $action,
     );   
@@ -221,10 +220,10 @@ function ldap_servers_admin_enable_disable_submit($form, &$form_state) {
         'status' => $status,
     );
     try {
-          $count = db_update('ldap_servers')
-           ->fields($entry)
-           ->condition('sid', $sid)
-           ->execute();
+      $count = db_update('ldap_servers')
+      ->fields($entry)
+      ->condition('sid', $sid)
+      ->execute();
     }
     catch (Exception $e) {
       drupal_set_message(t('db update failed. Message = %message, query= %query',

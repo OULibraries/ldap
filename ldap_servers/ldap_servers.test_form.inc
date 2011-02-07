@@ -8,8 +8,6 @@
  *
  */
 
-
-
 /**
  * Implements the LDAP server test page.
  *
@@ -56,11 +54,10 @@ $form['#prefix'] .= theme('ldap_servers_server', $variables);
   );
   
   if ( $form['binding']['bindpw']) {
-       $form['binding']['bindpw']['#description'] = t('<p>Leave emtpy to test with currently stored password.</p>');
-    }
-    
+    $form['binding']['bindpw']['#description'] = t('<p>Leave emtpy to test with currently stored password.</p>');
+  }
 
- $form['testing_drupal_username'] = array(
+  $form['testing_drupal_username'] = array(
     '#type' => 'textfield',
     '#title' => t('Testing Drupal Username'),
     '#default_value' => $ldap_server->testingDrupalUsername,
@@ -69,7 +66,7 @@ $form['#prefix'] .= theme('ldap_servers_server', $variables);
     '#description' => t('This is optional and used for testing this server\'s configuration against an actual username.  The user need not exist in Drupal and testing will not affect the user\'s LDAP or Drupal Account.'),
   );
   
- 
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'test',
@@ -99,40 +96,38 @@ function ldap_servers_test_form_submit($form, &$form_state) {
   $results = array();
   if ($values['bindpw']) {
     $bindpw = $values['bindpw'];
-    $bindpw_type = "password entered in form.";
+    $bindpw_type = t('entered in form.');
   } 
   else {
     $bindpw = NULL;
-    $bindpw_type = "password stored in configuration";
+    $bindpw_type = t('stored in configuration');
   }
 
-  $results[] = "Testing with $bindpw_type";
+  $results[] = t('Binding with DN for non-anonymous search (%bind_dn).  Using password ', array('%bind_dn' =>  $ldap_server->binddn)) . ' ' . $bindpw_type;
 
   // connect to ldap
   // $ldap_server = NULL;
-   list($has_errors, $more_results) = ldap_servers_test_binding_credentials($ldap_server, $bindpw);
-   $results = array_merge($results, $more_results);
+  list($has_errors, $more_results) = ldap_servers_test_binding_credentials($ldap_server, $bindpw);
+  $results = array_merge($results, $more_results);
 
-   if (!$has_errors) {
-     list($has_errors, $more_results, $ldap_user) = ldap_servers_test_user_mapping($values['testing_drupal_username'], $ldap_server);
-     $results = array_merge($results, $more_results);
-     
-     if (!$has_errors) {
-        $mapping[] = "dn = " . $ldap_user['dn'];
-        $mapping[] = "email = " . $ldap_user['mail'];
+  if (!$has_errors) {
+    list($has_errors, $more_results, $ldap_user) = ldap_servers_test_user_mapping($values['testing_drupal_username'], $ldap_server);
+    $results = array_merge($results, $more_results);
 
-        foreach ($ldap_user['attr'] as $key => $value) {
-          if (is_array($value)) {
-            $mapping[] = "$key = " . $value[0];
-          }
+    if (!$has_errors) {
+      $mapping[] = "dn = " . $ldap_user['dn'];
+      $mapping[] = "email = " . $ldap_user['mail'];
+
+      foreach ($ldap_user['attr'] as $key => $value) {
+        if (is_array($value)) {
+          $mapping[] = "$key = " . $value[0];
         }
-        // $mapping[] = theme_item_list(array('items' => $list, 'title' => 'Attributes', 'type' => 'ul', 'attributes' => array()));
-        $results[] =  theme_item_list(array('items' => $mapping, 'title' => 'Attributes', 'type' => 'ul', 'attributes' => array()));
-     }
-  
-   }
+      }
+    // $mapping[] = theme_item_list(array('items' => $list, 'title' => 'Attributes', 'type' => 'ul', 'attributes' => array()));
+    $results[] =  theme_item_list(array('items' => $mapping, 'title' => t('Attributes available to %bind_dn', array('%bind_dn' =>  $ldap_server->binddn)) , 'type' => 'ul', 'attributes' => array()));
+    }
+  }
 
- 
   $title =  t('Test %name LDAP Server Configuration', array('%name' => $ldap_server->name));
   $message =  theme_item_list(   array('items' => $results, 'title' => $title, 'type' => 'ul', 'attributes' => array()));
   drupal_set_message(t("<form>" . $message . "</form>"), ($has_errors) ? 'error' : 'status');
@@ -143,50 +138,41 @@ function ldap_servers_test_form_submit($form, &$form_state) {
 
 function ldap_servers_test_binding_credentials(&$ldap_server, $bindpw) {
 
- $errors = FALSE;
- $results = array();
+  $errors = FALSE;
+  $results = array();
 
- $ldap_result = $ldap_server->connect();
- if ($ldap_result != LDAP_SUCCESS) {
-   $results[] = "Failed to connect to LDAP server.  See watchdog error logs for details";
-   $errors = TRUE;
-
- }
-
-if (!$errors) {
-
-  $bind_result = $ldap_server->bind($ldap_server->binddn, $bindpw);
-
-  if ($bind_result == LDAP_SUCCESS) {
-    $results[] =  "successfully bound to server";
-  } 
-  else {
-    $results[] = "failed to bind to server. ldap error #" . $bind_result;
+  $ldap_result = $ldap_server->connect();
+  if ($ldap_result != LDAP_SUCCESS) {
+    $results[] = "Failed to connect to LDAP server.  See watchdog error logs for details";
     $errors = TRUE;
   }
-}
 
+  if (!$errors) {
+    $bind_result = $ldap_server->bind($ldap_server->binddn, $bindpw);
+    if ($bind_result == LDAP_SUCCESS) {
+      $results[] =  t('Successfully bound to server');
+    } 
+    else {
+      $results[] = t('Failed to bind to server. ldap error #') . $bind_result;
+      $errors = TRUE;
+    }
+  }
 
   return array($errors, $results);
-
-
-}
- 
- function ldap_servers_test_user_mapping($drupal_username, &$ldap_server) {
-       $ldap_user = $ldap_server->user_lookup($drupal_username);
-       $errors = FALSE;
-       if (! $ldap_user ) {
-          $results[] = t('Failed to find test user %username by searching on  %user_attr = %username.', array('%username' => $drupal_username, '%user_attr' => $ldap_server->user_attr ));
-          $errors = TRUE;
-       }
-       else {
-         $results[] = t('Found test user %username by searching on  %user_attr = %username.', array('%username' => $drupal_username, '%user_attr' => $ldap_server->user_attr ));
-       }
-     
-     return array($errors, $results, $ldap_user);
-
 }
 
+function ldap_servers_test_user_mapping($drupal_username, &$ldap_server) {
+  $ldap_user = $ldap_server->user_lookup($drupal_username);
+  $errors = FALSE;
+  if (! $ldap_user ) {
+    $results[] = t('Failed to find test user %username by searching on  %user_attr = %username.', array('%username' => $drupal_username, '%user_attr' => $ldap_server->user_attr ));
+    $errors = TRUE;
+  }
+  else {
+    $results[] = t('Found test user %username by searching on  %user_attr = %username.', array('%username' => $drupal_username, '%user_attr' => $ldap_server->user_attr ));
+  }
+  return array($errors, $results, $ldap_user);
+}
 
 
 

@@ -264,8 +264,7 @@ class LdapServer {
         return FALSE;
       }
     }
-  //  $basedn = ($basedn != NULL) ? $basedn : $this->basedn;
-    //dpm(array($this, $this->connection, $basedn, $filter, $attributes));
+
     $result = ldap_search($this->connection, $basedn, $filter, $attributes);
    // restore_error_handler();
     if ($result && ldap_count_entries($this->connection, $result)) {
@@ -299,7 +298,8 @@ class LdapServer {
   
       // Must find exactly one user for authentication to.
       if ($result['count'] != 1) {
-        watchdog('ldapauth', "Error: %num_matches users found with $%filter under %basedn.", array('%num_matches' => $result['count'], '%filter' => $filter, '%basedn' => $basedn), WATCHDOG_ERROR);
+        $count = $result['count'];
+        watchdog('ldap_authentication', "Error:  $count users found with $filter under $basedn.", WATCHDOG_ERROR);
         continue;
       }
       $match = $result[0];
@@ -309,9 +309,9 @@ class LdapServer {
       // characters' case.
       // This was contributed by Dan "Gribnif" Wilga, and described
       // here: http://drupal.org/node/87833
-     $name_attr = $this->user_attr;
+      $name_attr = $this->user_attr;
       if (!isset($match[$this->user_attr][0])) {
-        $name_attr = drupal_strtolower($this->user_attr);
+      $name_attr = drupal_strtolower($this->user_attr);
         if (!isset($match[$name_attr][0]))
           continue;
       }

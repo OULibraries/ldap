@@ -2,9 +2,8 @@
 // $Id$
 
 /**
- * @file 
+ * @file
  * Provides functions for encryption/decryption.
- *
  * http://stackoverflow.com/questions/2448256/php-mcrypt-encrypting-decrypting-file
  */
 
@@ -44,13 +43,13 @@ function _ldap_servers_encrypt_types($type = 'all') {
       LDAP_SERVERS_ENC_TYPE_SHA => 'SHA',
       LDAP_SERVERS_ENC_TYPE_SALTED_SHA => 'SHA Salted',
     );
-    **/
+    */
 
    /** $encrypts = array(
       LDAP_SERVERS_ENC_TYPE_EXTENDED_DES => 'Extended DES',
       LDAP_SERVERS_ENC_TYPE_BLOWFISH => 'Blowfish',
       LDAP_SERVERS_ENC_TYPE_SALTED_CRYPT => 'Salted Crypt',
-    ); **/
+    ); */
 
     $encrypts = array(
       LDAP_SERVERS_ENC_TYPE_CLEARTEXT => 'No Encyption',

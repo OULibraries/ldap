@@ -7,14 +7,14 @@
  */
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 function ldap_authentication_install() {
 
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function ldap_authentication_uninstall() {
   //$result = db_query('DELETE FROM {variables} WHERE name like "ldap_authentication_%"');  

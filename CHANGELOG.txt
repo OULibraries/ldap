@@ -3,8 +3,30 @@
 ==================
 7.x-1.0-unstable5
 ==================
-- reintroduction of API functionality and includes
-- documentation cleanup.
+- install instructions:  disable and uninstall previous ldap modules. make sure tables are removed.
+------------------
+- main focus of unstable 5 is ldap_authentication, not ldap_authorization
+- ldap_authentication: added test grid for ldap_authentication testing:  http://drupal.org/node/1053818
+- ldap_authentication: added typical authentication configurations: http://drupal.org/node/1053748
+- ldap_help:  added "status" and "issue reporting" tabs to improve testing and bug reporting
+- ldap_authentication: removed option to allow ldap users to change, have separate drupal email.  this feature needs more work if desired at all.
+- ldap_authentication: added configurable help link for ldap password resetting.
+- ldap_authentication: made more content themeable, especially where localized ldap user help may be a factor
+- ldap_authentication: #807416  finished and tested white lists 
+- ldap_authentication: clarified and tested rules for existing drupal account conflicts.  Desired behavior is in 
+tests (ldap_authentication.tests.txt).
+- ldap_authentication: #968574, #256226, #258974 added "Account Creation for LDAP Authenticated Users" section for account creation.  Desired behavior is in 
+tests (ldap_authentication.tests.txt).  Pushed some configuration over to user settings page.
+- ldap_servers: #1050590 added check for existance of https in $_SERVER array per 
+- ldap_authorization: #1050944 fixed array work ldap to role mapping. 
+- ldap_servers: improved wording on required https message and made themeable 
+- ldap_authentication: #1023510 several tweaks for ldap authentication settings related to location and visibility of password, 
+password reset links, account creation links, etc. Many of the combinations made no sense and the form was overly complex.  The logic is
+articulated in the ldap authentication settings form and ldap_authentication.tests.txt
+- ldap_authentication: moved request account and password reset link hide/show logic from theming layer to menu/permission layer.
+makes more sense and reduced code alot.
+- another trip through drupal code module
+
 
 ==================
 7.x-1.0-unstable4

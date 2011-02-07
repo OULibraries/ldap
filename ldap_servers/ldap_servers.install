@@ -6,8 +6,9 @@
  * Install, update and uninstall functions for the LDAP API module.
  */
 
+
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 function ldap_servers_install() {
   variable_set('ldap_servers_encryption', 'none');
@@ -22,24 +23,16 @@ function ldap_servers_install() {
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function ldap_servers_uninstall() {
   variable_del('ldap_servers_encryption');
   variable_del('ldap_servers_require_ssl_for_credentails');
   variable_del('ldap_servers_encrypt_key');
- // require_once('LdapServerAdmin.class.php');
- // $servers = LdapServerAdmin::getLdapServerObjects(NULL, NULL, 'LdapServerAdmin');
- // foreach($servers as $sid => $ldap_server) {
- //   $ldap_server->delete();
-//  }
- // dpm('call ldap_servers_uninstall');
- // dpm(ldap_servers_schema());
-//  drupal_uninstall_schema('ldap_servers');
-  
+
 }
 /**
- * Implementation of hook_requirements().
+ * Implements hook_requirements().
  */
 function ldap_servers_requirements($phase) {
   $requirements = array();
@@ -59,21 +52,21 @@ function ldap_servers_requirements($phase) {
 }
 
 /**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function ldap_servers_schema() {
-   $schema['ldap_servers'] = array(
+  $schema['ldap_servers'] = array(
     'export' => array(
-       'key' => 'sid',
-       'key name' => 'Server ID',
-       'identifier' => 'ldap_servers_conf',
-        'api' => array(
-          'owner' => 'ldap_servers',
-          'api' => 'ldap_servers',
-          'minimum_version' => 1,
-          'current_version' => 1,
-         ),
-    ),
+      'key' => 'sid',
+      'key name' => 'Server ID',
+      'identifier' => 'ldap_servers_conf',
+      'api' => array(
+        'owner' => 'ldap_servers',
+        'api' => 'ldap_servers',
+        'minimum_version' => 1,
+        'current_version' => 1,
+        ),
+      ),
     'fields' => array(
       'sid' => array(
         'type' => 'varchar',
@@ -164,9 +157,8 @@ function ldap_servers_schema() {
     'primary key' => array('numeric_sid'),
     'unique keys' => array('name' => array('name')),
   );
-   
+
   return $schema;
-  
- 
+
 }
 

@@ -322,8 +322,9 @@ class LdapAuthorizationMappingAdmin extends LdapAuthorizationMapping {
       '#title' => t('III.A. LDAP to !consumer_name mapping and filtering', $consumer_tokens),
       '#description' => t('@todo (this needs some rewriting.  Its fuzzy. This module automatically decides the !consumer_namePlural based on LDAP data.
         For example:<ul>
-        <li>LDAP group: Admins => !consumer_name: Admins</li>
-        <li>LDAP group: ou=Underlings,dc=myorg,dc=mytld => !consumer_name: Underlings.</li>
+        <li>LDAP group: Admins => !consumer_name: Admins <br/>...is written <code>as:Admins|Admins</code>  </li>
+        <li>LDAP group: ou=Underlings,dc=myorg,dc=mytld => !consumer_name: Underlings. <br/>
+        ...is written as:<code>ou=Underlings,dc=myorg,dc=mytld|Underlings</code> </li>
         </ul>', $consumer_tokens),
       '#collapsible' => TRUE,
       '#collapsed' => !($this->mappings || $this->useMappingsAsFilter),

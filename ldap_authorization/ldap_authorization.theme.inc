@@ -1,5 +1,6 @@
 <?php
 
+
 function theme_ldap_authorization_admin_index(&$variables) {
   extract($variables);  //
 
@@ -13,7 +14,7 @@ function theme_ldap_authorization_admin_index(&$variables) {
   );
 
   if (count($mappings)) {
-    //dpm($mappings);
+  
     foreach($mappings as $mapping_id => $mapping) {
       $consumer = ldap_authorization_get_consumer_object(array('consumer_type' => $mapping->consumerType));
       if ($consumer) {

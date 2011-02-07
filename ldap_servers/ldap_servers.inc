@@ -1,11 +1,9 @@
 <?php
 // $Id$
 
-
 /**
- * @file 
+ * @file
  * collection of functions that don't belong in server object
- *
  */
 
 function _ldap_servers_get_user_ldap_data($drupal_user, $sid) {
@@ -26,7 +24,7 @@ function _ldap_servers_get_user_ldap_data($drupal_user, $sid) {
 function _ldap_servers_get_servers($sid, $type, $flatten, $reset) {
   require_once('LdapServerAdmin.class.php');
   static $servers;
-   //dpm($servers);
+
   if ($reset) {
     $servers = array();
   }
@@ -34,13 +32,13 @@ function _ldap_servers_get_servers($sid, $type, $flatten, $reset) {
     $servers['all'] = LdapServerAdmin::getLdapServerObjects('all');
   }
   if (!isset($servers['enabled'])) {
-   foreach ($servers['all'] as $_sid => $ldap_server) {
+    foreach ($servers['all'] as $_sid => $ldap_server) {
       if ($ldap_server->status == 1) {
         $servers['enabled'][$_sid] = $ldap_server;
       }
     }
   }
- // dpm($servers); dpm($sid);
+
   if ($sid) {
     if (!isset($servers[$type][$sid])) {
       return FALSE;

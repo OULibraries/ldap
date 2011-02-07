@@ -1,10 +1,11 @@
 <?php
 // $Id$
+
 /**
- * Description of LdapAuthenticationConfAdmin
- *
- * @author jbarclay
+ * @file
+ * This classextends by LdapAuthenticationConf for configuration and other admin functions
  */
+
 require_once('LdapAuthenticationConf.class.php');
 class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
 
@@ -18,33 +19,37 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
   public $authenticationModeDefault = LDAP_AUTHENTICATION_MIXED;
   public $authenticationModeOptions = array(
       LDAP_AUTHENTICATION_MIXED => 'Mixed mode. Drupal authentication is tried first.  On failure, LDAP authentication is performed.',
-      LDAP_AUTHENTICATION_EXCLUSIVE => 'Only LDAP Authentication is allowed except for user 1.',
+      LDAP_AUTHENTICATION_EXCLUSIVE => 'Only LDAP Authentication is allowed except for user 1.  
+        If selected, (1) reset password links will be replaced with links to ldap end user documentation below.  
+        (2) The reset password form will be left available at user/password for user 1; but no links to it 
+        will be provided to anonymous users.  
+        (3) Password fields in user profile form will be removed except for user 1.',
       );
 
-  public $logonFormHideResetPasswordDefault = TRUE;
-  public $logonFormHideResetPasswordDescription = 'Hide reset password link on logon forms.';
-
-
-  public $logonFormHideCreateAccountDefault = TRUE;
-  public $logonFormHideCreateAccountDescription = 'Hide create account link on logon forms.';
-  
-  
   protected $authenticationServersDescription = "Check all LDAP server configurations to use in authentication.
     Each will be tested for authentication until successful or
     until each is exhausted.  In most cases only one server configuration is selected.";
   protected $authenticationServersOptions = array();
   
+
+  protected $ldapUserHelpLinkUrlDescription  = 'URL to LDAP user help/documentation for users resetting 
+    passwords etc. Should be of form http://domain.com/. Could be the institutions ldap password support page
+    or a page within this drupal site that is available to anonymous users.';
+
+  protected $ldapUserHelpLinkTextDescription  = 'Text for above link e.g. Account Help or Campus Password Help Page';
+
+
   /**
    * 2.  LDAP User Restrictions
    */
 
   protected $allowOnlyIfTextInDnDescription = "A list of text such as ou=education
    or cn=barclay that at least one of be found in users cn string.  Enter one per line
-   such as <pre> ou=education \n ou=engineering</pre>";
+   such as <pre> ou=education \n ou=engineering</pre>   This test will be case insensitive.";
 
   protected $excludeIfTextInDnDescription = "A list of text such as ou=evil
    or cn=bad that if found in a users cn, exclude them from ldap authentication.
-   Enter one per line such as <pre> ou=evil \n cn=bad</pre>";
+   Enter one per line such as <pre> ou=evil \n cn=bad</pre> This test will be case insensitive.";
 
 
   protected $allowTestPhpDescription = "PHP code which should return boolean
@@ -56,36 +61,46 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
    /**
    * 3. Drupal Account Provisioning and Syncing
    */
-  public $loginConflictResolveDescription = 'What should be done if a local Drupal or other external authentication account already exists with the same login name.';
+  public $loginConflictResolveDescription = 'What should be done if a local Drupal or other external 
+    authentication account already exists with the same login name. ';
   public $loginConflictResolveDefault = LDAP_AUTHENTICATION_CONFLICT_LOG; // LDAP_CONFLICT_RESOLVE;
   public $loginConflictOptions = array(
       LDAP_AUTHENTICATION_CONFLICT_LOG => 'Disallow login and log the conflict',
-      LDAP_AUTHENTICATION_CONFLICT_RESOLVE => 'Associate local account with the LDAP entry',
+      LDAP_AUTHENTICATION_CONFLICT_RESOLVE => 'Associate local account with the LDAP entry.  This option
+        is useful for creating accounts and assigning roles before an ldap user authenticates.',
       );
 
-  protected $ldapUsersRequireAdminApprovalDescription = "When a user authenticates via LDAP
-    and it is a new account, start the account out as disabled and email the admin for
-    it to be approved.";
-
-
-  protected $ldapUsersDontCreateAutomaticallyDescription = "Do not create Drupal accounts
-    for LDAP authenticated users. Allow existing Drupal accounts to authenticate via LDAP.
-    With this option, user accounts using LDAP authentication will need to be created before 
-    a user logs on. .";
-
-
+ 
+  public $acctCreationDescription = '';
+  public $acctCreationDefault = LDAP_AUTHENTICATION_ACCT_CREATION_DEFAULT; 
+  public $acctCreationOptions = array(
+      LDAP_AUTHENTICATION_ACCT_CREATION_LDAP_BEHAVIOR => 'Create accounts automatically for ldap authenticated users.  
+        Account creation settings at /admin/config/people/accounts/settings will only affect non-ldap authenticated accounts.',
+      LDAP_AUTHENTICATION_ACCT_CREATION_USER_SETTINGS_FOR_LDAP => 'Use account creation policy
+         at /admin/config/people/accounts/settings under for both Drupal and LDAP Authenticated users.
+         "Visitors" option automatically creates and account when they successfully LDAP authenticate.
+         "Admin" and "Admin with approval" do not allow user to authenticate until the account is approved.',
+      );
+  
+  
    /**
    * 4. Email
    */
 
   public $emailOptionDefault = LDAP_AUTHENTICATION_EMAIL_FIELD_REMOVE; // LDAP_CONFLICT_RESOLVE;
   public $emailOptionOptions = array(
-      LDAP_AUTHENTICATION_EMAIL_ALLOW_DRUPAL_EMAIL => 'Allow users to overwrite and edit their email in Drupal.
-          If no email is present, email will be drived from LDAP on logon.  If an email that conflicts with
-          the LDAP derived email is present, it will not be overwritten.',
       LDAP_AUTHENTICATION_EMAIL_FIELD_REMOVE => 'Don\'t show an email field on user forms.  LDAP derived email will be used for user and connot be changed by user',
       LDAP_AUTHENTICATION_EMAIL_FIELD_DISABLE => 'Show disabled email field on user forms with LDAP derived email.  LDAP derived email will be used for user and connot be changed by user',
       );
+ /*    
+  *  this option is disabled.  to implement correctly, need to verify password on user profile form.
+  *  because password is required to change email. 
+  * 
+  *    LDAP_AUTHENTICATION_EMAIL_ALLOW_DRUPAL_EMAIL => 'Allow users to overwrite and edit their email in Drupal.
+          If no email is present, email will be drived from LDAP on logon.  If an email that conflicts with
+          the LDAP derived email is present, it will not be overwritten.',
+  
+  */
 
   public $errorMsg = NULL;
   public $hasError = FALSE;
@@ -99,7 +114,7 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
   }
 
   
- public function save() {
+  public function save() {
     foreach ($this->saveable as $property) {
       $save[$property] = $this->{$property};
     }
@@ -113,9 +128,9 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
   public function __construct() {
     parent::__construct();
     if ($servers = ldap_servers_get_servers(NULL, 'enabled')) {
-      foreach( $servers as $sid => $ldap_server) {
+      foreach ($servers as $sid => $ldap_server) {
         $enabled = ($ldap_server->status) ? 'Enabled' : 'Disabled';
-        $this->authenticationServersOptions[$sid] = $ldap_server->name .' ('. $ldap_server->address .') Status: '. $enabled;
+        $this->authenticationServersOptions[$sid] = $ldap_server->name . ' (' . $ldap_server->address . ') Status: ' . $enabled;
       }  
     }
   }
@@ -146,7 +161,7 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
       '#collapsed' => FALSE,
     );
 
-   $form['logon']['authenticationMode'] = array(
+    $form['logon']['authenticationMode'] = array(
       '#type' => 'radios',
       '#title' => t('Allowable Authentications'),
       '#required' => 1,
@@ -155,7 +170,7 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
     );
 
 
-   $form['logon']['authenticationServers'] = array(
+    $form['logon']['authenticationServers'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Authentication LDAP Server Configurations'),
       '#required' => FALSE,
@@ -164,19 +179,24 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
       '#description' => $this->authenticationServersDescription
     );
 
-   $form['logon']['logonFormHideResetPassword'] = array(
-      '#type' => 'checkbox',
-      '#title' => t($this->logonFormHideResetPasswordDescription, $tokens),
-      '#default_value' =>  $this->logonFormHideResetPassword,
-    );
-   
-   $form['logon']['logonFormHideCreateAccount'] = array(
-      '#type' => 'checkbox',
-      '#title' => t($this->logonFormHideCreateAccountDescription, $tokens),
-      '#default_value' =>  $this->logonFormHideCreateAccount,
+    $form['logon']['ldapUserHelpLinkUrl'] = array(
+      '#type' => 'textfield',
+      '#title' => t('LDAP Account User Help URL'),
+      '#required' => 0,
+      '#default_value' => $this->ldapUserHelpLinkUrl,
+      '#description' => $this->ldapUserHelpLinkUrlDescription,
     );
 
-   $form['restrictions'] = array(
+
+    $form['logon']['ldapUserHelpLinkText'] = array(
+      '#type' => 'textfield',
+      '#title' => t('LDAP Account User Help Link Text'),
+      '#required' => 0,
+      '#default_value' => $this->ldapUserHelpLinkText,
+      '#description' => $this->ldapUserHelpLinkTextDescription,
+    );
+    
+    $form['restrictions'] = array(
       '#type' => 'fieldset',
       '#title' => t('LDAP User "Whitelists" and Restrictions'),
       '#collapsible' => TRUE,
@@ -184,7 +204,7 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
     );
 
 
-   $form['restrictions']['allowOnlyIfTextInDn'] = array(
+    $form['restrictions']['allowOnlyIfTextInDn'] = array(
       '#type' => 'textarea',
       '#title' => t('Allow Only Text Test'),
       '#default_value' => $this->arrayToLines($this->allowOnlyIfTextInDn),
@@ -211,16 +231,14 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
       '#description' => t($this->allowTestPhpDescription, $tokens),
     );
 
-
-   $form['drupal_accounts'] = array(
+    $form['drupal_accounts'] = array(
       '#type' => 'fieldset',
       '#title' => t('Drupal User Account Creation'),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
     );
 
-
-   $form['drupal_accounts']['loginConflictResolve'] = array(
+    $form['drupal_accounts']['loginConflictResolve'] = array(
       '#type' => 'radios',
       '#title' => t('Existing Drupal User Account Conflict'),
       '#required' => 1,
@@ -228,21 +246,16 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
       '#options' => $this->loginConflictOptions,
       '#description' => t( $this->loginConflictResolveDescription),
     );
-
-
-   $form['drupal_accounts']['ldapUsersRequireAdminApproval'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Require Admin Approval after Initial Logon'),
-      '#default_value' =>  $this->ldapUsersRequireAdminApproval,
-      '#description' => t($this->ldapUsersRequireAdminApprovalDescription, $tokens),
-    );
-
-   $form['drupal_accounts']['ldapUsersDontCreateAutomatically'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Don\'t Create Drupal Accounts'),
-      '#default_value' =>  $this->ldapUsersDontCreateAutomatically,
-      '#description' => t($this->ldapUsersDontCreateAutomaticallyDescription, $tokens),
-    );
+    
+  
+    $form['drupal_accounts']['acctCreation'] = array(
+      '#type' => 'radios',
+      '#title' => t('Account Creation for LDAP Authenticated Users'),
+      '#required' => 1,
+      '#default_value' => $this->acctCreation,
+      '#options' => $this->acctCreationOptions,
+      '#description' => t($this->acctCreationDescription),
+    );  
 
     $form['email'] = array(
       '#type' => 'fieldset',
@@ -251,7 +264,7 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
       '#collapsed' => FALSE,
     );
 
-   $form['email']['emailOption'] = array(
+    $form['email']['emailOption'] = array(
       '#type' => 'radios',
       '#title' => t('Email Behavior'),
       '#required' => 1,
@@ -270,7 +283,7 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
 /**
  * validate form, not object
  */
- public function drupalFormValidate($values)  {
+  public function drupalFormValidate($values)  {
 
     $this->populateFromDrupalForm($values);
 
@@ -286,43 +299,41 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
     $errors = array();
 
     return $errors;
-}
+  }
 
   protected function populateFromDrupalForm($values) {
-
     $this->authenticationMode = ($values['authenticationMode']) ? (int)$values['authenticationMode'] : NULL;
     $this->sids = $values['authenticationServers'];
-    $this->logonFormHideResetPassword  = (bool)(@$values['logonFormHideResetPassword']);
-    $this->logonFormHideCreateAccount  = (bool)(@$values['logonFormHideCreateAccount']);
     $this->allowOnlyIfTextInDn = $this->linesToArray($values['allowOnlyIfTextInDn']);
     $this->excludeIfTextInDn = $this->linesToArray($values['excludeIfTextInDn']);
     $this->allowTestPhp = $values['allowTestPhp'];
     $this->loginConflictResolve  = ($values['loginConflictResolve']) ? (int)$values['loginConflictResolve'] : NULL;
-    $this->ldapUsersRequireAdminApproval  = (bool)(@$values['ldapUsersRequireAdminApproval']);
-    $this->ldapUsersDontCreateAutomatically = (bool)(@$values['ldapUsersDontCreateAutomatically']);
+    $this->acctCreation  = ($values['acctCreation']) ? (int)$values['acctCreation'] : NULL;   
+    $this->ldapUserHelpLinkUrl = ($values['ldapUserHelpLinkUrl']) ? (string)$values['ldapUserHelpLinkUrl'] : NULL;
+    $this->ldapUserHelpLinkText = ($values['ldapUserHelpLinkText']) ? (string)$values['ldapUserHelpLinkText'] : NULL;
     $this->emailOption  = ($values['emailOption']) ? (int)$values['emailOption'] : NULL;
- 
-}
+  }
 
   public function drupalFormSubmit($values) {
 
-   $this->populateFromDrupalForm($values);
+    $this->populateFromDrupalForm($values);
     try {
         $save_result = $this->save();
     }
-    catch(Exception $e) {
+    catch (Exception $e) {
       $this->errorName = 'Save Error';
       $this->errorMsg = t('Failed to save object.  Your form data was not saved.');
       $this->hasError = TRUE;
     }
- 
+
   }
 
   protected function arrayToLines($array) {
         $lines = "";
         if (is_array($array)) {
           $lines = join("\n", $array);
-        }  elseif (is_array(@unserialize($array))) {
+        }  
+        elseif (is_array(@unserialize($array))) {
           $lines = join("\n", unserialize($array));
         }
         return $lines;
@@ -331,14 +342,13 @@ class LdapAuthenticationConfAdmin extends LdapAuthenticationConf {
   protected function linesToArray($lines) {
     $lines = trim($lines);
 
-     if ($lines) {
-       $array = explode("\n", $lines);
-     }
-     else {
-       $array = array();
-     }
-
-     return $array;
+    if ($lines) {
+      $array = explode("\n", $lines);
+    }
+    else {
+      $array = array();
+    }
+    return $array;
   }
   
 }
