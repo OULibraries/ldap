@@ -1,4 +1,3 @@
-// $Id$
 
 /**
  * Behaviours are bound to the Drupal namespace.

@@ -1,4 +1,3 @@
-; $Id$
 name = "LDAP API"
 description = "An LDAP API that can be used by other modules. 
 DO NOT ENABLE LDAP API. LDAP API conflicts with LDAP Servers

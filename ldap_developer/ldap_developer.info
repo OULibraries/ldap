@@ -1,4 +1,3 @@
-; $Id$
 name = LDAP Developer
 description = "Only of use to people developing LDAP Module.  Will not be in final release."
 package = "Lightweight Directory Access Protocol"

@@ -1,4 +1,3 @@
-; $Id$
 
 http://drupal.org/node/928026
 ldap_servers_encrypt_key
