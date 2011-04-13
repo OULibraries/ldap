@@ -1,4 +1,5 @@
 <?php
+// $Id: ldap_servers.inc,v 1.4.2.1 2011/02/08 06:01:00 johnbarclay Exp $
 
 /**
  * @file
@@ -16,7 +17,6 @@ function _ldap_servers_get_user_ldap_data($drupal_user, $sid) {
       return $ldap_user;
     }
   }
-  
 }
 
 
@@ -46,11 +46,9 @@ function _ldap_servers_get_servers($sid, $type, $flatten, $reset) {
   }
 
   if (isset($servers[$type])) {
-      
     return $servers[$type];
-  } 
+  }
 }
-
 
 
 function _ldap_servers_fields() {

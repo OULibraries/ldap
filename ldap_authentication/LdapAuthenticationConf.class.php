@@ -1,4 +1,5 @@
 <?php
+// $Id: LdapAuthenticationConf.class.php,v 1.4.2.2 2011/02/08 20:05:41 johnbarclay Exp $
 
 /**
  * @file
@@ -13,12 +14,13 @@ class LdapAuthenticationConf {
   public $sids = array();  // server configuration ids being used for authentication
   public $servers = array(); // ldap server object
   public $inDatabase = FALSE;
-  public $authenticationMode = LDAP_AUTHENTICATION_MIXED;
+  public $authenticationMode = LDAP_AUTHENTICATION_MODE_DEFAULT;
   public $ldapUserHelpLinkUrl;
-  public $ldapUserHelpLinkText = "Account Help";       
-  public $loginConflictResolve = LDAP_AUTHENTICATION_CONFLICT_LOG;
+  public $ldapUserHelpLinkText = LDAP_AUTHENTICATION_HELP_LINK_TEXT_DEFAULT;
+  public $loginConflictResolve = LDAP_AUTHENTICATION_CONFLICT_RESOLVE_DEFAULT;
   public $acctCreation = LDAP_AUTHENTICATION_ACCT_CREATION_DEFAULT;
-  public $emailOption = LDAP_AUTHENTICATION_EMAIL_FIELD_REMOVE;
+  public $emailOption = LDAP_AUTHENTICATION_EMAIL_FIELD_DEFAULT;
+  public $emailUpdate = LDAP_AUTHENTICATION_EMAIL_UPDATE_ON_LDAP_CHANGE_DEFAULT;
   public $apiPrefs = array();
   public $createLDAPAccounts; // should an drupal account be created when an ldap user authenticates
   public $createLDAPAccountsAdminApproval; // create them, but as blocked accounts
@@ -44,11 +46,12 @@ class LdapAuthenticationConf {
     'ldapUserHelpLinkUrl',
     'ldapUserHelpLinkText',
     'emailOption',
+    'emailUpdate',
     'allowOnlyIfTextInDn',
     'excludeIfTextInDn',
     'allowTestPhp',
   );
-  
+
   /** are any ldap servers that are enabled associated with ldap authentication **/
   public function enabled_servers() {
     return !(count(array_filter(array_values($this->sids))) == 0);
@@ -59,7 +62,7 @@ class LdapAuthenticationConf {
 
 
   function load() {
-  
+
     if ($saved = variable_get("ldap_authentication_conf", FALSE)) {
       $this->inDatabase = TRUE;
       foreach ($this->saveable as $property) {
@@ -69,30 +72,30 @@ class LdapAuthenticationConf {
       }
       foreach ($this->sids as $sid) {
         $this->servers[$sid] = ldap_servers_get_servers($sid, 'enabled', TRUE);
-        //print "<pre> $sid"; print_r( $this->servers[$sid]); die;
       }
-    } 
+    }
     else {
       $this->inDatabase = FALSE;
     }
-    
+
     $this->apiPrefs['requireHttps'] = variable_get('ldap_servers_require_ssl_for_credentails', 1);
     $this->apiPrefs['encryption'] = variable_get('ldap_servers_encryption', NULL);
-    
+
     // determine account creation configuration
     $user_register = variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
     if ($this->acctCreation == LDAP_AUTHENTICATION_ACCT_CREATION_DEFAULT || $user_register == USER_REGISTER_VISITORS) {
       $this->createLDAPAccounts = TRUE;
       $this->createLDAPAccountsAdminApproval = FALSE;
-    } 
+    }
     elseif ($user_register == USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) {
       $this->createLDAPAccounts = FALSE;
       $this->createLDAPAccountsAdminApproval = TRUE;
-    } else {
+    }
+    else {
       $this->createLDAPAccounts = FALSE;
       $this->createLDAPAccountsAdminApproval = FALSE;
     }
-  
+
   }
 
   /**
@@ -110,9 +113,6 @@ class LdapAuthenticationConf {
    * return boolean
    */
   public function allowUser($name, $ldap_user) {
-    
-      //print "<pre>"; print_r($ldap_user); die;
-
     /**
      * do one of the exclude attribute pairs match
      */
@@ -122,30 +122,29 @@ class LdapAuthenticationConf {
         return FALSE;//  if a match, return FALSE;
       }
     }
-    
-    
+
+
     /**
      * evaluate php if it exists
      */
     if (module_exists('php') && $this->allowTestPhp) {
-      $code = '<?php ' . $this->allowTestPhp . ' ?>';  
+      $code = '<?php ' . $this->allowTestPhp . ' ?>';
       $code_result = @php_eval($code);
-   //   print "<pre>". $this->allowTestPhp . "-- $code_result";
       if ((boolean)($code_result) == FALSE) {
         return FALSE;
-      } 
+      }
     }
-    
+
     /**
      * do one of the allow attribute pairs match
      */
     if (count($this->allowOnlyIfTextInDn)) {
       foreach ($this->allowOnlyIfTextInDn as $test) {
-        if ( strpos(drupal_strtolower($ldap_user['dn']), drupal_strtolower($test)) !== FALSE) {
+        if (strpos(drupal_strtolower($ldap_user['dn']), drupal_strtolower($test)) !== FALSE) {
           return TRUE;
         }
       }
-      return FALSE;  
+      return FALSE;
     }
 
     /**
@@ -153,7 +152,6 @@ class LdapAuthenticationConf {
      */
     return TRUE;
   }
-  
+
 
 }
-

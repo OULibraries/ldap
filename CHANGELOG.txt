@@ -1,30 +1,66 @@
+// $Id: CHANGELOG.txt,v 1.1.4.3 2011/02/08 20:19:24 johnbarclay Exp $
+
+==================
+7.x-1.0-unstable6
+==================
+
+Ldap Authentication and Ldap Servers are feature complete.  Testing and bug
+fixes are needed to move it toward a relase candidate.  
+
+Ldap Authorization got a good cleanup and restructuring, but
+is wholly untested.  I would not use this version of ldap authorization or expect it to work;
+but I am ready for bug reports and patches as the rewrite is done.
+
+Issue [#1050944] by [dennisz]: allowing for more than one authorization configuration per consumer type (e.g. drupal roles)
+was never implemented. Realized this and changed the architecture so only support 1. This allowed alot of code to be removed
+as well as made the instructions better.
+Issue [#1119774] by [micahw156]: fixed broken password validation on service account
+Issue [#1034712] by [wernercd]: way to short of db field length for some ldap fields.
+Issue [#1034734] by [wernercd]: made changes to encourage filtering and mapping in ldap authorization
+Issue [#1026078] by [wernercd], [micahw156]: menus, tabs, and breadcrumbs are better now.  I think they still could be improved.
+Issue [#989090] by
+Issues ([#1101422], [#1104366], [#1064692], [#1067158]) arise from the anonymous and user binding to ldap
+  part on ldap authentication not being implemented yet. [cezaryrk] code took care of the binding side and more options were
+  added to the sever configuration.
+Issue [#1110854] by [rbp]: fixed parsing of lines into arrays.  was not accounting for both unix and windows line endings.  this could have created
+any number of issues with configurations that involved text areas with multiple lines such as: [#1110854].   Thanks rbp for pointing
+this out.
+Issue [#1111000] by [ankurs]: added some of ankurs functions for password reset into ldap_servers/ldap_servers.functions.inc.  [#1111000]
+Issue [#1101422]:  bug with account creation flag fixed,
+Issue [#1089854] better ldap error messages shown in watchdog for server binding, connection, etc.
+
 
 ==================
 7.x-1.0-unstable5
 ==================
 - install instructions:  disable and uninstall previous ldap modules. make sure tables are removed.
 ------------------
-- main focus of unstable 5 is ldap_authentication, not ldap_authorization
+- main focus of unstable 5 is ldap_authentication including  finishing out features, improving usability,
+fixing bugs, documentation and setting up tests. ldap_authorization still needs features to be
+finished out, documentation and usability improvements, and a set of tests.
+- ldap_authentication: reordered authentication validation related to issue #1022362
 - ldap_authentication: added test grid for ldap_authentication testing:  http://drupal.org/node/1053818
 - ldap_authentication: added typical authentication configurations: http://drupal.org/node/1053748
 - ldap_help:  added "status" and "issue reporting" tabs to improve testing and bug reporting
 - ldap_authentication: removed option to allow ldap users to change, have separate drupal email.  this feature needs more work if desired at all.
 - ldap_authentication: added configurable help link for ldap password resetting.
 - ldap_authentication: made more content themeable, especially where localized ldap user help may be a factor
-- ldap_authentication: #807416  finished and tested white lists 
-- ldap_authentication: clarified and tested rules for existing drupal account conflicts.  Desired behavior is in 
+- ldap_authentication: #807416  finished and tested white lists
+- ldap_authentication: clarified and tested rules for existing drupal account conflicts.  Desired behavior is in
 tests (ldap_authentication.tests.txt).
-- ldap_authentication: #968574, #256226, #258974 added "Account Creation for LDAP Authenticated Users" section for account creation.  Desired behavior is in 
+- ldap_authentication: #968574, #256226, #258974 added "Account Creation for LDAP Authenticated Users" section for account creation.  Desired behavior is in
 tests (ldap_authentication.tests.txt).  Pushed some configuration over to user settings page.
-- ldap_servers: #1050590 added check for existance of https in $_SERVER array per 
-- ldap_authorization: #1050944 fixed array work ldap to role mapping. 
-- ldap_servers: improved wording on required https message and made themeable 
-- ldap_authentication: #1023510 several tweaks for ldap authentication settings related to location and visibility of password, 
+- ldap_servers: #1050590 added check for existance of https in $_SERVER array per
+- ldap_authorization: #1050944 fixed array work ldap to role mapping.
+- ldap_servers: improved wording on required https message and made themeable
+- ldap_authentication: #1023510 several tweaks for ldap authentication settings related to location and visibility of password,
 password reset links, account creation links, etc. Many of the combinations made no sense and the form was overly complex.  The logic is
 articulated in the ldap authentication settings form and ldap_authentication.tests.txt
 - ldap_authentication: moved request account and password reset link hide/show logic from theming layer to menu/permission layer.
 makes more sense and reduced code alot.
-- another trip through drupal code module
+- another trip through drupal code module\
+- ldap_authorization: #1026138 bug that didn't remove past ldap applied roles #1026138
+- ldap_authorization: fixed 1 case insensitivity issue; may be more.  target role mappings are case sensitive in php, but not in mysql.
 
 
 ==================
@@ -43,4 +79,3 @@ makes more sense and reduced code alot.
 - #1017282 uninitialized array gives warning.  I'd like to get rid of all these types of warnings.
 - #807420 initial exportables/features code added.  needs testing.  not sure if ldap_servers_encrypt_key variable should be exportable
 - starter working with coder module cleanup (spacing, translation, etc)
-

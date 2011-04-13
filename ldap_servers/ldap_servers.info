@@ -1,3 +1,4 @@
+; $Id: ldap_servers.info,v 1.4.2.1 2011/02/08 06:01:00 johnbarclay Exp $
 name = LDAP Servers
 description = "Implements LDAP Server Configuration"
 package = "Lightweight Directory Access Protocol"
@@ -15,6 +16,7 @@ files[] = ldap_servers.module
 files[] = ldap_servers.settings.inc
 files[] = ldap_servers.test_form.inc
 files[] = ldap_servers.theme.inc
+files[] = ldap_servers.test.inc
 
 
 
@@ -23,4 +25,3 @@ configure = admin/config/people/ldap/servers
 features[variable][] = "ldap_servers_encryption"
 features[variable][] = "ldap_servers_require_ssl_for_credentials"
 features[variable][] = "ldap_servers_encrypt_key"
-
