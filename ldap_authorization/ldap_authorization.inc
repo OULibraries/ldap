@@ -483,7 +483,7 @@ function _ldap_authorization_ldap_authorization_maps_alter(&$user, &$user_ldap_e
 
   // traditional groups (dns)
   /*The Following line has been commented out to enable a different functionality for OU's Authentication
-  $group_dns = $consumer_conf->server->groupMembershipsFromUser($user, 'group_dns');
+  *  $group_dns = $consumer_conf->server->groupMembershipsFromUser($user, 'group_dns');
   */
   //The Two lines below have been used for retrieving group memberships of a user from the ldap server
   $nested = "Yes";
